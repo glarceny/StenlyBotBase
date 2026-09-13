@@ -12,18 +12,10 @@ module.exports = {
     command: ["sc", "script", "getsc"],
     description: "Dapatkan tautan source code bot",
     run: async (context) => {
-        const { sock, from, pushname, thumb, reply } = context;
+        const { sock, from, thumb, reply } = context;
 
-        const sc = `\n> *halo ${pushname}, apakah kamu ingin base script ini?*`;
-        const anu = `
-jika kamu menginginkan base script ini silahkan klik tombol di bawah ini
-
-\`rulles\`
-- dilarang keras menghapus credits minimal taro di tqto
-- dilarang memperjual belikan base ini karena 100% free
-- boleh di jual dengan syarat sudah di tambah fitur
-- dilarang mengklaim script ini 100%
-`.trim();
+        const sc = "";
+        const anu = `*klik tombol get sc untuk mendapatkan source code script base bot WhatsApp ini*`;
 
         try {
             const media = await prepareWAMessageMedia(
@@ -44,7 +36,7 @@ jika kamu menginginkan base script ini silahkan klik tombol di bawah ini
                             name: "cta_url",
                             buttonParamsJson: JSON.stringify({
                                 display_text: "get sc",
-                                url: "https://github.com/itsliaaa/baileys",
+                                url: "https://github.com/glarceny/StenlyBotBase",
                                 merchant_url: "https://www.google.com"
                             })
                         }
