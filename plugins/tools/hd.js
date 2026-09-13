@@ -90,7 +90,15 @@ module.exports = {
     command: ["hd"],
     description: "Upscale gambar via Pixelcut API",
     run: async (context) => {
-        const { sock, m, args, prefix, mime, qmsg, botName, reply } = context;
+        const { sock, m, args, prefix, mime, qmsg, botName, isPremium, reply } = context;
+
+        if (!isPremium) {
+            return sendMenuStyle(sock, m, context, "Premium Tools", [
+                "> Status : *Akses ditolak*",
+                "> Fitur HD khusus user premium*",
+                "> Hubungi owner untuk mendapatkan akses"
+            ]);
+        }
 
         const scale = args.includes("4") ? "4" : "2";
         const inputUrl = args.find(value => /^https?:\/\//i.test(value));
