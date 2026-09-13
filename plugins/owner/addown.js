@@ -12,7 +12,7 @@ module.exports = {
     command: ["addowner", "addown", "delowner", "delown"],
     owner: true,
     run: async (context) => {
-        const { sock, m, command, args, q, prefix, isCreator, reply } = context;
+        const { sock, m, command, args, q, prefix, isCreator, reply, groupMetadata } = context;
 
         const ownerPath = "./lib/database/owner.json";
 
@@ -21,7 +21,7 @@ module.exports = {
             if (!args[0] && !(m.mentionedJid || m.msg?.contextInfo?.mentionedJid)?.length) return reply(`*example: ${prefix}addowner 628xxx atau mention seseorang*`);
 
             const ownerbot = readList(ownerPath);
-            const target = resolveTarget(m, args, q);
+            const target = await resolveTarget(sock, m, args, q, groupMetadata);
             if (!target || !(await verifyWhatsAppNumber(sock, target))) return reply(`*Masukkan nomor WhatsApp yang valid atau mention anggota grup.*`);
 
             if (ownerbot.includes(target)) return reply(`*${target} sudah jadi owner*`);
@@ -36,7 +36,7 @@ module.exports = {
             if (!args[0] && !(m.mentionedJid || m.msg?.contextInfo?.mentionedJid)?.length) return reply(`*example: ${prefix}delowner 628xxx atau mention seseorang*`);
 
             const ownerbot = readList(ownerPath);
-            const target = resolveTarget(m, args, q);
+            const target = await resolveTarget(sock, m, args, q, groupMetadata);
             let unp = ownerbot.indexOf(target);
             if (unp === -1) return reply(`*${target} BUKAN OWNER*`);
 
