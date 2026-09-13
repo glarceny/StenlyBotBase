@@ -1,103 +1,87 @@
-# Stenly WhatsApp Bot Base
+# StenlyBotBase
 
-Base bot WhatsApp berbasis Node.js dan Baileys fork `@itsliaaa/baileys`. Proyek ini menyediakan koneksi WhatsApp dengan pairing code, command handler berbasis plugin, menu interaktif, dan pemuatan ulang plugin otomatis ketika file plugin berubah.
+Base bot WhatsApp yang saya pakai untuk mulai mengembangkan bot dengan Node.js dan Baileys.
 
-## Status Proyek
-
-Proyek ini adalah base sederhana untuk pengembangan lebih lanjut. Fitur yang tersedia saat ini telah dipisahkan ke dalam plugin, tetapi belum dimaksudkan sebagai framework bot lengkap atau sistem produksi siap pakai.
-
-## Fitur
+Fitur yang sudah ada masih sederhana:
 
 - Pairing code WhatsApp.
-- Mode `public` dan `self`.
-- Menu interaktif berbasis kategori plugin.
-- Command owner dan premium berbasis JSON lokal.
-- Auto-load plugin dari folder `plugins/`.
-- Hot-reload plugin saat file `.js` dibuat, diubah, atau dihapus.
-- Helper serialisasi pesan dan utilitas umum.
-- Aset thumbnail untuk menu interaktif.
+- Menu interaktif.
+- Mode public dan self.
+- Owner dan premium dari file JSON.
+- Sistem plugin.
+- Plugin bisa ditambah atau diedit tanpa restart bot.
 
-## Persyaratan
-
-- Node.js 18 atau lebih baru.
-- npm.
-- FFmpeg jika ingin menggunakan utilitas konversi media di `lib/converter.js`.
-- Akun WhatsApp yang akan ditautkan sebagai perangkat companion.
-
-## Instalasi
+## Install
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/glarceny/StenlyBotBase.git
 cd StenlyBotBase
 npm install
 npm start
 ```
 
-Saat dijalankan tanpa session tersimpan, bot akan meminta nomor WhatsApp dalam format internasional, misalnya `628xxxxxxxxxx`, lalu menampilkan pairing code.
+Saat pertama kali dijalankan, masukkan nomor WhatsApp dengan format seperti ini:
 
-Untuk menjalankan tanpa prompt interaktif:
-
-```bash
-PAIRING_NUMBER=628xxxxxxxxxx node index.js
+```text
+628xxxxxxxxxx
 ```
 
-Atau:
+Nomor juga bisa langsung diberikan lewat command:
 
 ```bash
 node index.js 628xxxxxxxxxx
 ```
 
-Setelah pairing berhasil, kredensial lokal disimpan di folder `session/`. Folder tersebut sengaja diabaikan oleh Git dan tidak boleh dibagikan.
+atau:
 
-## Command Saat Ini
-
-Prefix default adalah `/` dan dapat diubah di `control/settings.js`.
-
-### Main
-
-- `/menu`
-- `/allmenu`
-- `/owner`
-- `/sc`
-- `/script`
-- `/getsc`
-
-### Owner
-
-- `/addowner` atau `/addown`
-- `/delowner` atau `/delown`
-- `/addprem`
-- `/delprem`
-- `/public`
-- `/self`
-- `=> kode-javascript`
-- `$ perintah-shell`
-
-Bot juga memiliki trigger otomatis untuk kata yang berkaitan dengan Baileys, seperti `bail`, `baileys`, dan `npm`, ketika pesan tidak diawali prefix.
-
-## Struktur Direktori
-
-```text
-.
-├── control/
-│   └── settings.js       # Konfigurasi global bot
-├── lib/
-│   ├── database/          # Daftar owner dan premium
-│   ├── media/             # Aset gambar menu
-│   ├── myfunc.js          # Helper dan serialisasi pesan
-│   ├── color.js            # Helper warna terminal
-│   ├── converter.js        # Konversi media dengan FFmpeg
-│   └── plugins.js         # Registry dan watcher plugin
-├── plugins/
-│   ├── main/              # Menu, info owner, script, dan trigger Baileys
-│   └── owner/             # Manajemen owner, premium, mode, dan command owner
-├── index.js               # Entry point dan koneksi WhatsApp
-└── stenly.js              # Core handler dan dispatcher plugin
+```bash
+PAIRING_NUMBER=628xxxxxxxxxx node index.js
 ```
 
-## Menambah Plugin
+Setelah berhasil terhubung, session akan tersimpan di folder `session/`. Folder tersebut tidak ikut masuk repository.
 
-Buat file JavaScript baru di dalam subfolder `plugins/`:
+## Command
+
+Prefix default: `/`
+
+```text
+/menu
+/allmenu
+/owner
+/sc
+/script
+/getsc
+
+/addowner 628xxx
+/addown 628xxx
+/delowner 628xxx
+/delown 628xxx
+/addprem 628xxx
+/delprem 628xxx
+/public
+/self
+```
+
+Command owner tambahan:
+
+```text
+=> kode-javascript
+$ perintah-shell
+```
+
+Pengaturan utama ada di `control/settings.js`.
+
+## Plugin
+
+Plugin ada di folder `plugins/`. Saat ini contohnya:
+
+```text
+plugins/
+├── main/
+└── owner/
+```
+
+Contoh plugin sederhana:
 
 ```javascript
 module.exports = {
@@ -105,46 +89,44 @@ module.exports = {
     category: "info",
     command: ["contoh"],
     run: async ({ reply, args }) => {
-        await reply(`Argumen: ${args.join(" ") || "tidak ada"}`);
+        await reply(args.join(" ") || "Halo");
     }
 };
 ```
 
-Plugin akan dimuat otomatis. Perubahan pada file plugin juga akan diambil tanpa restart bot. Jika plugin memiliki fitur hook tanpa command biasa, gunakan properti `menu` agar fitur tersebut ikut tampil di menu kategori:
+Simpan file tersebut sebagai `plugins/info/contoh.js`. Plugin akan terdeteksi otomatis, dan kategori `Info Menu` akan muncul di `/menu`.
 
-```javascript
-module.exports = {
-    name: "contoh-hook",
-    category: "info",
-    menu: ["trigger otomatis"],
-    before: async ({ body }) => {
-        return false;
-    }
-};
+Kalau file plugin diedit atau dihapus, perubahan akan diproses oleh plugin watcher tanpa restart bot.
+
+## Struktur Singkat
+
+```text
+control/settings.js  konfigurasi bot
+index.js             koneksi WhatsApp
+stenly.js            handler pesan
+lib/plugins.js       loader dan watcher plugin
+plugins/             fitur-fitur bot
+lib/database/        owner.json dan premium.json
+lib/media/            gambar menu
 ```
 
-## Konfigurasi
+## PM2
 
-Edit `control/settings.js` untuk mengubah nama bot, prefix, versi, developer, dan owner utama. Daftar owner tambahan dan premium disimpan dalam:
-
-- `lib/database/owner.json`
-- `lib/database/premium.json`
-
-Data tersebut adalah file lokal sederhana, bukan database multi-user.
-
-## Menjalankan Dengan PM2
+Kalau ingin menjalankan bot di background:
 
 ```bash
 pm2 start index.js --name stenly-bot -- 628xxxxxxxxxx
 pm2 save
 ```
 
-Perintah `pm2 logs stenly-bot` dapat digunakan untuk melihat status koneksi dan aktivitas plugin.
+Lihat log dengan:
 
-## Catatan Lisensi dan Dependency
+```bash
+pm2 logs stenly-bot
+```
 
-Kode base ini menggunakan dependency dari npm dan GitHub, termasuk fork `@itsliaaa/baileys`. Penggunaan, redistribusi, serta perubahan pada dependency pihak ketiga mengikuti lisensi dan ketentuan masing-masing proyek.
+## Catatan
 
-## Lisensi
+Ini masih berupa base bot, bukan bot dengan banyak fitur siap pakai. Beberapa utilitas media membutuhkan FFmpeg. Dependency utama Baileys menggunakan fork `@itsliaaa/baileys`.
 
-Metadata proyek mencantumkan lisensi MIT. Periksa file dan dependency terkait sebelum melakukan redistribusi sebagai produk atau layanan komersial.
+Lisensi proyek: MIT.
