@@ -235,7 +235,10 @@ module.exports = async (sock, m, chatUpdate, store) => {
         if (command) {
             const plugin = plugins.findPlugin(command);
             if (plugin && typeof plugin.run === 'function') {
-                if (plugin.owner && !isCreator) {
+                if (plugin.premium && !isPremium && !isCreator && !isOwner) {
+                    return reply("*Fitur ini khusus user premium dan owner!*");
+                }
+                if (plugin.owner && !plugin.premium && !isCreator && !isOwner) {
                     return reply("*khusus owner!*");
                 }
                 if (plugin.group && !isGroup) {

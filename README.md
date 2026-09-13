@@ -60,6 +60,8 @@ Prefix default: `/`
 /delprem 628xxx
 /public
 /self
+/crm
+/crm -snipp
 ```
 
 Command owner tambahan:
@@ -70,6 +72,8 @@ $ perintah-shell
 ```
 
 Pengaturan utama ada di `control/settings.js`.
+
+`/crm` dan `/crm -snipp` membutuhkan akses premium atau owner dan harus digunakan sambil reply pesan.
 
 ## Plugin
 
