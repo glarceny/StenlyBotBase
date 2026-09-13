@@ -1,6 +1,5 @@
 const fs = require('fs')
 
-// settings bot
 global.namaown = "Stenly WhatsApp BotSimple"
 global.prefix = "/"
 global.botname = "Llama ly's Support"

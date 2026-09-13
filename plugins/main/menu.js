@@ -27,7 +27,6 @@ module.exports = {
             plugins
         } = context;
 
-        // Ambil seluruh kategori dan list perintah dari plugin manager
         const categories = plugins ? plugins.getCategories() : {};
         const catKeys = Object.keys(categories).sort((a, b) => {
             if (a === 'main') return -1;
@@ -37,7 +36,6 @@ module.exports = {
             return a.localeCompare(b);
         });
 
-        // Susun baris single_select kategori tanpa markdown (contoh: "Owner Menu", "Main Menu")
         const categoryRows = catKeys.map(cat => {
             const label = cat.charAt(0).toUpperCase() + cat.slice(1) + " Menu";
             return {
@@ -55,7 +53,6 @@ module.exports = {
             }
         ];
 
-        // Cek apakah user meminta kategori tertentu (misal: /menu owner atau /ownermenu)
         let selectedCat = null;
         if (args && args[0] && categories[args[0].toLowerCase()]) {
             selectedCat = args[0].toLowerCase();
@@ -66,7 +63,6 @@ module.exports = {
             }
         }
 
-        // Helper untuk membuat tombol interaktif
         const makeMenuButtons = () => [
             {
                 buttonId: "allmenu",
@@ -91,7 +87,6 @@ module.exports = {
             }
         ];
 
-        // 1. TAMPILAN MENU KATEGORI SPESIFIK (Misal: Owner Menu / Main Menu)
         if (selectedCat) {
             const catFormatted = selectedCat.charAt(0).toUpperCase() + selectedCat.slice(1) + "menu";
             const cmds = categories[selectedCat] || [];
@@ -124,7 +119,6 @@ _*Tekan tombol di bawah untuk melihat semua menu*_`;
             });
         }
 
-        // 2. TAMPILAN MENU UTAMA DASHBOARD (/menu)
         const totalCmds = plugins ? plugins.countCommands() : (global.totalcmd || 8);
         const totalCats = catKeys.length || (global.botcategory || 1);
 

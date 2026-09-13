@@ -37,10 +37,8 @@ const {
     parseMention
 } = require('./lib/myfunc');
 
-// Inisialisasi sistem plugin & auto watcher saat pertama kali dimuat
 plugins.initPlugins();
 
-// Cache thumbnail menu agar efisien
 let cachedThumb = null;
 async function getThumbnail() {
     try {
@@ -160,7 +158,6 @@ module.exports = async (sock, m, chatUpdate, store) => {
         const totalCommands = global.totalcmd || plugins.countCommands();
         const memoryUsage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)} MB`;
 
-        // Susun context lengkap untuk disalurkan ke plugin
         const context = {
             sock,
             m,
@@ -232,11 +229,9 @@ module.exports = async (sock, m, chatUpdate, store) => {
             plugins
         };
 
-        // 1. Eksekusi hook 'before' dari semua plugin (auto trigger, eval, dll.)
         const handledBefore = await plugins.runBefore(context);
         if (handledBefore) return;
 
-        // 2. Eksekusi plugin command jika command terdeteksi
         if (command) {
             const plugin = plugins.findPlugin(command);
             if (plugin && typeof plugin.run === 'function') {
