@@ -12,14 +12,10 @@ const IMAGE_HOSTS = [
     {
         url: "https://uguu.se/upload.php",
         field: "files[]",
-        parse: async response => (await response.json())?.files?.[0]?.url
-    },
-    {
-        url: "https://tmpfiles.org/api/v1/upload",
-        field: "file",
         parse: async response => {
-            const result = (await response.json())?.data?.url;
-            return result ? result.replace("tmpfiles.org/", "tmpfiles.org/dl/") : null;
+            const contentType = response.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) return null;
+            return (await response.json())?.files?.[0]?.url;
         }
     }
 ];
@@ -53,12 +49,12 @@ async function uploadTemporaryImage(buffer) {
                 lastError = `${host.url} menghasilkan content-type ${contentType || "unknown"}`;
                 continue;
             }
-            lastError = `${host.url} (${response.status})`;
+            lastError = `${host.url} tidak mengembalikan URL gambar (${response.status})`;
         } catch (error) {
             lastError = `${host.url} (${error.message})`;
         }
     }
-    throw new Error(lastError);
+    throw new Error(`host upload tidak tersedia: ${lastError}`);
 }
 
 function makeButtons(prefix) {
