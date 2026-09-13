@@ -7,18 +7,7 @@
 const { generateWAMessageFromContent, downloadContentFromMessage } = require("@itsliaaa/baileys");
 const sharp = require("sharp");
 
-const API = "https://pixel.stenly.id/upscale";
-const IMAGE_HOSTS = [
-    {
-        url: "https://uguu.se/upload.php",
-        field: "files[]",
-        parse: async response => {
-            const contentType = response.headers.get("content-type") || "";
-            if (!contentType.includes("application/json")) return null;
-            return (await response.json())?.files?.[0]?.url;
-        }
-    }
-];
+const API = "https://pixel.stenly.id/upscale/upload";
 
 async function streamToBuffer(stream) {
     const chunks = [];
@@ -26,35 +15,29 @@ async function streamToBuffer(stream) {
     return Buffer.concat(chunks);
 }
 
-async function uploadTemporaryImage(buffer) {
+async function upscaleBuffer(buffer, scale) {
     const normalized = await sharp(buffer).jpeg({ quality: 92 }).toBuffer();
-    let lastError = "upload media gagal";
-    for (const host of IMAGE_HOSTS) {
-        try {
-            const form = new FormData();
-            form.append(host.field, new Blob([normalized], { type: "image/jpeg" }), "input.jpg");
-            const response = await fetch(host.url, {
-                method: "POST",
-                body: form,
-                signal: AbortSignal.timeout(60000)
-            });
-            const url = await host.parse(response);
-            if (response.ok && /^https?:\/\//i.test(url || "")) {
-                const probe = await fetch(url, {
-                    method: "HEAD",
-                    signal: AbortSignal.timeout(30000)
-                });
-                const contentType = probe.headers.get("content-type") || "";
-                if (probe.ok && contentType.startsWith("image/")) return url;
-                lastError = `${host.url} menghasilkan content-type ${contentType || "unknown"}`;
-                continue;
-            }
-            lastError = `${host.url} tidak mengembalikan URL gambar (${response.status})`;
-        } catch (error) {
-            lastError = `${host.url} (${error.message})`;
-        }
+    const form = new FormData();
+    form.append("image", new Blob([normalized], { type: "image/jpeg" }), "input.jpg");
+    form.append("scale", scale);
+
+    const response = await fetch(API, {
+        method: "POST",
+        body: form,
+        signal: AbortSignal.timeout(180000)
+    });
+    const text = await response.text();
+    let payload;
+    try {
+        payload = JSON.parse(text);
+    } catch (_) {
+        throw new Error(`respons API tidak valid (${response.status})`);
     }
-    throw new Error(`host upload tidak tersedia: ${lastError}`);
+    if (!response.ok || !payload.ok || !payload.result_url) {
+        const detail = payload.detail || payload.error || text.slice(0, 300);
+        throw new Error(`API ${response.status}: ${detail}`);
+    }
+    return payload;
 }
 
 function makeButtons(prefix) {
@@ -129,44 +112,29 @@ module.exports = {
         ]);
 
         try {
-            let sourceUrl = inputUrl;
-            if (!sourceUrl && (hasImageMessage || hasQuotedImage)) {
+            let result;
+            if (!inputUrl && (hasImageMessage || hasQuotedImage)) {
                 const imageMessage = hasImageMessage ? m.msg : qmsg;
                 const stream = await downloadContentFromMessage(imageMessage, "image");
                 const imageBuffer = await streamToBuffer(stream);
                 if (!imageBuffer.length) throw new Error("media WhatsApp kosong");
-                sourceUrl = await uploadTemporaryImage(imageBuffer);
+                result = await upscaleBuffer(imageBuffer, scale);
             }
 
-            const endpoint = `${API}?url=${encodeURIComponent(sourceUrl)}&scale=${scale}`;
-            const res = await fetch(endpoint, {
-                method: "GET",
-                signal: AbortSignal.timeout(120000)
-            });
-            const text = await res.text();
-
-            if (res.status === 429) {
-                return sendMenuStyle(sock, m, context, "HD Limit", [
-                    `> Scale : *${scale}x*`,
-                    `> Status : *Limit API tercapai*`,
-                    `> Coba lagi nanti`
-                ]);
-            }
-
-            if (!res.ok) {
-                let msg = text.slice(0, 300);
-                return sendMenuStyle(sock, m, context, "HD Gagal", [
-                    `> Scale : *${scale}x*`,
-                    `> Kode : *${res.status}*`,
-                    `> Pesan : *${msg}*`
-                ]);
-            }
-
-            let result;
-            try {
-                result = JSON.parse(text);
-            } catch (_) {
-                return reply(`*Respons API tidak valid.*`);
+            if (inputUrl) {
+                const endpoint = new URL("https://pixel.stenly.id/upscale");
+                endpoint.searchParams.set("url", inputUrl);
+                endpoint.searchParams.set("scale", scale);
+                const res = await fetch(endpoint, { signal: AbortSignal.timeout(180000) });
+                const text = await res.text();
+                try {
+                    result = JSON.parse(text);
+                } catch (_) {
+                    throw new Error(`respons API tidak valid (${res.status})`);
+                }
+                if (!res.ok || !result.ok || !result.result_url) {
+                    throw new Error(`API ${res.status}: ${result.detail || result.error || text.slice(0, 300)}`);
+                }
             }
 
             const resultUrl = result.result_url;
