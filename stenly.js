@@ -85,10 +85,22 @@ module.exports = async (sock, m, chatUpdate, store) => {
 
         const premium = JSON.parse(fs.readFileSync("./lib/database/premium.json"));
         const OWNER_PATH = "./lib/database/owner.json";
-        const isPremium = premium.includes(m.sender);
         const sender = m.key.fromMe
             ? sock.user.id.split(":")[0] || sock.user.id
             : m.key.participant || m.key.remoteJid;
+        const normalizeAccessJid = value => {
+            const jid = String(value || "").replace(/:\d+(?=@)/, "");
+            if (jid.endsWith("@lid")) return jid;
+            if (jid.includes("@")) return jid;
+            const number = jid.replace(/[^0-9]/g, "");
+            return number ? `${number}@s.whatsapp.net` : "";
+        };
+        let accessSender = normalizeAccessJid(sender);
+        if (accessSender.endsWith("@lid") && sock?.signalRepository?.lidMapping?.getPNForLID) {
+            try {
+                accessSender = normalizeAccessJid(await sock.signalRepository.lidMapping.getPNForLID(accessSender) || accessSender);
+            } catch (_) {}
+        }
         const senderNumber = sender.split('@')[0];
         const budy = (typeof m.text === 'string' ? m.text : '');
         const prefix = global.prefix || '/';
@@ -107,8 +119,10 @@ module.exports = async (sock, m, chatUpdate, store) => {
         };
 
         const ownerbot = JSON.parse(fs.readFileSync(OWNER_PATH));
-        const isOwner = ownerbot.includes(m.sender);
-        const isCreator = [botNumber, ...global.owner].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender);
+        const sameAccessJid = value => normalizeAccessJid(value) === accessSender;
+        const isPremium = premium.some(sameAccessJid);
+        const isOwner = ownerbot.some(sameAccessJid);
+        const isCreator = [botNumber, ...global.owner].some(sameAccessJid);
         const bodyTrim = (body || '').trim();
         const prefixMatch = bodyTrim.startsWith(prefix) ? prefix : null;
         let command = '';
