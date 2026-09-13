@@ -1,6 +1,7 @@
 node_modules/
 session/
 tmp/
+debug/
 logs/
 *.log
 .env
