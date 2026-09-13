@@ -1,0 +1,12 @@
+node_modules/
+session/
+tmp/
+logs/
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
