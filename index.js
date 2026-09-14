@@ -72,7 +72,7 @@ if (usePairingCode && !sock.authState.creds.registered) {
             console.log(chalk.yellow(`Meminta pairing code untuk nomor: ${phoneNumber}...`));
             let code;
             try {
-                code = await sock.requestPairingCode(phoneNumber, "ITSLIAAA");
+                code = await sock.requestPairingCode(phoneNumber, "STENLYCL");
             } catch (e) {
                 console.log(chalk.yellow("Custom pairing code gagal, mencoba code otomatis..."));
                 code = await sock.requestPairingCode(phoneNumber);
