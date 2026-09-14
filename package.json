@@ -22,7 +22,7 @@
         "@ffmpeg-installer/ffmpeg": "^1.1.0",
         "@hapi/boom": "^10.0.1",
         "@upstash/redis": "^1.34.4",
-        "@itsliaaa/baileys": "github:itsliaaa/baileys#b1c3b684b64e584d7d6f2e51220cc5e8d69f148b",
+        "@itsliaaa/baileys": "git+https://github.com/itsliaaa/baileys.git#b1c3b684b64e584d7d6f2e51220cc5e8d69f148b",
         "awesome-phonenumber": "^6.4.0",
         "chalk": "^4.1.2",
         "fluent-ffmpeg": "^2.1.3",
