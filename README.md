@@ -102,6 +102,12 @@ Simpan file tersebut sebagai `plugins/info/contoh.js`. Plugin akan terdeteksi ot
 
 Kalau file plugin diedit atau dihapus, perubahan akan diproses oleh plugin watcher tanpa restart bot.
 
+Kalau plugin baru belum muncul, cek log bot dan pastikan file tersebut berekstensi `.js` serta berada di dalam subfolder `plugins/`.
+
+## Kalau Pairing Gagal
+
+Hapus folder `session/` hanya jika ingin melakukan pairing ulang, lalu jalankan bot lagi. Kalau session masih ada, bot akan langsung mencoba memakai session tersebut dan tidak akan meminta nomor baru.
+
 ## Struktur Singkat
 
 ```text
