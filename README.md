@@ -139,4 +139,12 @@ pm2 logs stenly-bot
 
 Ini masih berupa base bot, bukan bot dengan banyak fitur siap pakai. Beberapa utilitas media membutuhkan FFmpeg. Dependency utama Baileys menggunakan fork `@itsliaaa/baileys`.
 
+## Kontribusi
+
+Simpan fitur baru sebagai plugin di dalam `plugins/`, jalankan pengecekan syntax sebelum push, dan sertakan penjelasan singkat di pull request.
+
+```bash
+node --check plugins/path/fitur.js
+```
+
 Lisensi proyek: MIT.
