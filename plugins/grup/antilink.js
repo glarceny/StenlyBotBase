@@ -25,29 +25,16 @@ function writeState(state) {
 }
 
 async function menuReply(sock, m, context, title, lines) {
-    const { botName, prefix, thumb, plugins } = context;
-    const categories = plugins.getCategories();
-    const sections = [{
-        title: "Pilihan Menu Plugins",
-        rows: Object.keys(categories).sort().map(category => ({
-            title: `${category.charAt(0).toUpperCase()}${category.slice(1)} Menu`,
-            description: `Lihat daftar fitur ${category}`,
-            id: `${prefix}menu ${category}`
-        }))
-    }];
+    const { botName, prefix, thumb } = context;
     const message = generateWAMessageFromContent(m.chat, {
         buttonsMessage: {
             buttons: [{
-                buttonId: "allmenu",
-                buttonText: { displayText: "Pilih Menu" },
-                nativeFlowInfo: {
-                    name: "single_select",
-                    paramsJson: JSON.stringify({ title: "Pilih Kategori Menu", sections })
-                },
+                buttonId: `${prefix}antilink on`,
+                buttonText: { displayText: "On" },
                 type: 1
             }, {
-                buttonId: `${prefix}owner`,
-                buttonText: { displayText: "Owner" },
+                buttonId: `${prefix}antilink off`,
+                buttonText: { displayText: "Off" },
                 type: 1
             }],
             locationMessage: {
