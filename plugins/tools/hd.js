@@ -6,6 +6,7 @@
 
 const { generateWAMessageFromContent, downloadContentFromMessage } = require("@itsliaaa/baileys");
 const sharp = require("sharp");
+const { categorySections } = require("../../lib/menu");
 
 const API = "https://pixel.stenly.id/upscale/upload";
 
@@ -40,7 +41,7 @@ async function upscaleBuffer(buffer, scale) {
     return payload;
 }
 
-function makeButtons(prefix) {
+function makeButtons(prefix, plugins) {
     return [
         {
             buttonId: "allmenu",
@@ -49,7 +50,7 @@ function makeButtons(prefix) {
                 name: "single_select",
                 paramsJson: JSON.stringify({
                     title: "Pilih Kategori Menu",
-                    sections: [{ title: "Pilihan Menu Plugins", rows: [] }]
+                    sections: categorySections(plugins, prefix)
                 })
             },
             type: 1
@@ -63,12 +64,12 @@ function makeButtons(prefix) {
 }
 
 async function sendMenuStyle(sock, m, ctx, title, lines) {
-    const { botName, prefix, thumb } = ctx;
+    const { botName, prefix, thumb, plugins } = ctx;
     const contentText = `\`「 ${botName} 」\``;
     const footerText = `\`「 ${title} 」\`\n${lines.join('\n')}\n\n_*Tekan tombol di bawah untuk melihat semua menu*_`;
     const menuMessage = generateWAMessageFromContent(m.chat, {
         buttonsMessage: {
-            buttons: makeButtons(prefix),
+            buttons: makeButtons(prefix, plugins),
             locationMessage: {
                 degreesLatitude: 0,
                 degreesLongitude: 0,

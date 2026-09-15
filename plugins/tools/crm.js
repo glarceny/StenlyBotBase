@@ -7,6 +7,7 @@
 const fs = require("fs");
 const path = require("path");
 const { generateWAMessageFromContent } = require("@itsliaaa/baileys");
+const { categorySections } = require("../../lib/menu");
 
 function unwrap(content) {
     if (!content || typeof content !== "object") return content;
@@ -118,7 +119,7 @@ function makeCodeBlocks(code) {
 }
 
 async function sendMenuStyle(sock, m, ctx, title, lines) {
-    const { botName, prefix, thumb } = ctx;
+    const { botName, prefix, thumb, plugins } = ctx;
     const message = generateWAMessageFromContent(m.chat, {
         buttonsMessage: {
             buttons: [
@@ -127,7 +128,7 @@ async function sendMenuStyle(sock, m, ctx, title, lines) {
                     buttonText: { displayText: "Pilih Menu" },
                     nativeFlowInfo: {
                         name: "single_select",
-                        paramsJson: JSON.stringify({ title: "Pilih Kategori Menu", sections: [] })
+                        paramsJson: JSON.stringify({ title: "Pilih Kategori Menu", sections: categorySections(plugins, prefix) })
                     },
                     type: 1
                 },

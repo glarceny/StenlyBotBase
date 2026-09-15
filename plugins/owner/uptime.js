@@ -5,6 +5,7 @@
 // ===================================================
 
 const { generateWAMessageFromContent } = require("@itsliaaa/baileys");
+const { categorySections } = require("../../lib/menu");
 
 function formatUptime(seconds) {
     let remaining = Math.floor(Number(seconds) || 0);
@@ -23,7 +24,7 @@ function formatUptime(seconds) {
 }
 
 async function sendMenuStyle(sock, m, context, uptime) {
-    const { botName, prefix, thumb } = context;
+    const { botName, prefix, thumb, plugins } = context;
     const message = generateWAMessageFromContent(m.chat, {
         buttonsMessage: {
             buttons: [
@@ -32,7 +33,7 @@ async function sendMenuStyle(sock, m, context, uptime) {
                     buttonText: { displayText: "Pilih Menu" },
                     nativeFlowInfo: {
                         name: "single_select",
-                        paramsJson: JSON.stringify({ title: "Pilih Kategori Menu", sections: [] })
+                        paramsJson: JSON.stringify({ title: "Pilih Kategori Menu", sections: categorySections(plugins, prefix) })
                     },
                     type: 1
                 },
