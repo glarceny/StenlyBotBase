@@ -17,7 +17,8 @@ const {
     generateWAMessage,
     generateWAMessageFromContent,
     getContentType,
-    prepareWAMessageMedia
+    prepareWAMessageMedia,
+    areJidsSameUser
 } = require("@itsliaaa/baileys");
 
 const { 
@@ -151,10 +152,25 @@ module.exports = async (sock, m, chatUpdate, store) => {
         const groupOwner = isGroup ? groupMetadata?.owner : "";
         const groupName = isGroup ? groupMetadata?.subject : "";
         const participants = isGroup ? (groupMetadata?.participants || []) : [];
-        const groupAdmins = isGroup ? participants.filter((v) => v.admin !== null).map((v) => v.id) : [];
+        const groupAdminParticipants = isGroup ? participants.filter((v) => v.admin !== null) : [];
+        const groupAdmins = groupAdminParticipants.map(v => v.id);
         const groupMembers = isGroup ? groupMetadata?.participants : [];
         const isGroupAdmins = isGroup ? groupAdmins.includes(m.sender) : false;
-        const isBotGroupAdmins = isGroup ? groupAdmins.includes(botNumber) : false;
+        const botLid = isGroup ? sock.user?.lid : "";
+        const sameUser = (a, b) => {
+            if (!a || !b) return false;
+            try {
+                return areJidsSameUser(a, b);
+            } catch (_) {
+                return false;
+            }
+        };
+        const isBotGroupAdmins = isGroup ? groupAdminParticipants.some(participant => {
+            return sameUser(participant.id, botNumber) ||
+                sameUser(participant.phoneNumber, botNumber) ||
+                sameUser(participant.id, botLid) ||
+                sameUser(participant.phoneNumber, botLid);
+        }) : false;
         const isBotAdmins = isBotGroupAdmins;
         const isAdmins = isGroupAdmins;
 
