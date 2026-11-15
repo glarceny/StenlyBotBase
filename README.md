@@ -13,6 +13,8 @@ Fitur yang sudah ada masih sederhana:
 
 ## Install
 
+Butuh Node.js 20 atau lebih baru.
+
 ```bash
 git clone https://github.com/glarceny/StenlyBotBase.git
 cd StenlyBotBase
